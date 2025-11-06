@@ -15,36 +15,31 @@ jobs:
     runs-on: ubuntu-latest
     name: Build and Deploy Job
     steps:
-      - uses: actions/checkout@v3
-        with:
-          submodules: true
-          lfs: false
+      - uses: actions/checkout@v4
 
+      # 1️⃣ Explicitly set Node 20+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20.11.1'
           cache: 'npm'
 
-      - name: Install dependencies
+      # 2️⃣ Explicitly install from Frontend folder
+      - name: Install and build Next.js app
         run: |
           cd Frontend
-          npm ci
-
-      - name: Build Next.js app
-        run: |
-          cd Frontend
+          npm ci || npm install
           npm run build
 
-      - name: Build And Deploy
-        id: builddeploy
+      # 3️⃣ Deploy to Azure Static Web App
+      - name: Deploy to Azure Static Web Apps
         uses: Azure/static-web-apps-deploy@v1
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_WHITE_GRASS_0A600AF0F }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: "upload"
-          app_location: "Frontend"     # 👈 no ./ prefix
-          api_location: "api"          # 👈 include if your Python or Node functions are here
+          app_location: "Frontend"
+          api_location: "api"
           output_location: ".next"
 
   close_pull_request_job:
@@ -53,7 +48,6 @@ jobs:
     name: Close Pull Request Job
     steps:
       - name: Close Pull Request
-        id: closepullrequest
         uses: Azure/static-web-apps-deploy@v1
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_WHITE_GRASS_0A600AF0F }}
