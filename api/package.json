@@ -11,7 +11,7 @@
     "heroku-postbuild": "npm run build && npx prisma generate"
   },
   "engines": {
-    "node": "18.x"
+    "node": "20.x"
   },
   "dependencies": {
     "@prisma/client": "^5.0.0",
