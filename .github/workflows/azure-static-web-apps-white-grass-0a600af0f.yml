@@ -31,7 +31,6 @@ jobs:
           cd Frontend
           npm ci
 
-
       - name: Build Next.js app
         run: |
           cd Frontend
@@ -44,8 +43,8 @@ jobs:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_WHITE_GRASS_0A600AF0F }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: "upload"
-          app_location: "Frontend"
-          api_location: ""
+          app_location: "Frontend"     # 👈 no ./ prefix
+          api_location: "api"          # 👈 include if your Python or Node functions are here
           output_location: ".next"
 
   close_pull_request_job:
@@ -59,5 +58,3 @@ jobs:
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_WHITE_GRASS_0A600AF0F }}
           action: "close"
-
-
