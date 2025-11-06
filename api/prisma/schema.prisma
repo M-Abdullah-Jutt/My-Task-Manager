@@ -1,0 +1,104 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+enum TaskStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+}
+
+model User {
+  id              String           @id @default(uuid())
+  email           String           @unique
+  password        String
+  name            String
+  role            Role             @default(USER)
+
+  createdTasks    Task[]           @relation("Creator")
+  assignedTasks   Task[]           @relation("AssignedUsers")
+  subTasks        SubTask[]
+  notifications   Notification[]
+  
+  // Add these two fields to fix the relation
+  sentInvitations TaskInvitation[] @relation("Inviter")
+  receivedInvitations TaskInvitation[] @relation("Invitee")
+
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+}
+
+model Task {
+  id              String           @id @default(uuid())
+  title           String
+  description     String?
+  status          TaskStatus       @default(PENDING)
+
+  creatorId       String
+  creator         User             @relation("Creator", fields: [creatorId], references: [id])
+
+  assignedUsers   User[]           @relation("AssignedUsers")
+
+  subTasks        SubTask[]
+  invitations     TaskInvitation[]
+
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+}
+
+model SubTask {
+  id              String           @id @default(uuid())
+  title           String
+  description     String?
+  status          TaskStatus       @default(PENDING)
+  dueDate         DateTime?
+
+  taskId          String
+  task            Task             @relation(fields: [taskId], references: [id])
+
+  assignedUserId  String
+  assignedUser    User             @relation(fields: [assignedUserId], references: [id])
+}
+
+model Notification {
+  id                  String   @id @default(uuid())
+  message             String
+  isRead              Boolean  @default(false)
+  userId              String
+  user                User     @relation(fields: [userId], references: [id])
+  relatedTaskId       String?
+  relatedInvitationId String?
+  type                String   @default("OTHER")
+  
+  createdAt           DateTime @default(now())
+}
+
+model TaskInvitation {
+  id              String   @id @default(uuid())
+  taskId          String
+  invitedUserId   String
+  invitedByUserId String
+  status          InvitationStatus @default(PENDING)
+
+  task            Task     @relation(fields: [taskId], references: [id])
+  invitedUser     User     @relation(fields: [invitedUserId], references: [id], name: "Invitee")
+  invitedByUser   User     @relation(fields: [invitedByUserId], references: [id], name: "Inviter")
+
+  @@unique([taskId, invitedUserId]) // A user can only be invited once per task
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
