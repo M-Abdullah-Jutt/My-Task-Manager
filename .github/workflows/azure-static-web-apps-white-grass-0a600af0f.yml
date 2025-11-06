@@ -27,7 +27,7 @@ jobs:
       # 2️⃣ Explicitly install from Frontend folder
       - name: Install and build Next.js app
         run: |
-          cd Frontend
+          # cd Frontend
           npm ci || npm install
           npm run build
 
@@ -38,7 +38,7 @@ jobs:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_WHITE_GRASS_0A600AF0F }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: "upload"
-          app_location: "Frontend"
+          app_location: ""
           api_location: "api"
           output_location: ".next"
 
